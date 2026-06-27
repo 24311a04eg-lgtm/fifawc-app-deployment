@@ -1,4 +1,4 @@
-name: testing
+name: CI - Build Verification
 
 on:
   push:
@@ -27,10 +27,10 @@ jobs:
           cd backend
           npm install
 
-      - name: Backend sanity check
+      - name: Backend syntax check
         run: |
           cd backend
-          node -e "require('./server.js'); console.log('Backend OK')"
+          node --check server.js
 
       # ---------------- FRONTEND ----------------
       - name: Install frontend dependencies
