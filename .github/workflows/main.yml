@@ -1,4 +1,4 @@
-name: Build Test CI
+name: testing
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-test:
+  build-verification:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,6 +26,11 @@ jobs:
         run: |
           cd backend
           npm install
+
+      - name: Backend sanity check
+        run: |
+          cd backend
+          node -e "require('./server.js'); console.log('Backend OK')"
 
       # ---------------- FRONTEND ----------------
       - name: Install frontend dependencies
