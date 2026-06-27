@@ -1,14 +1,39 @@
-name: testing
+name: Build Test CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  hello:
+  build-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Say Hello
-        run: echo "testing branch pr"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # ---------------- BACKEND ----------------
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      # ---------------- FRONTEND ----------------
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
