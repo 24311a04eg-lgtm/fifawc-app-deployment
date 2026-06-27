@@ -1,14 +1,44 @@
-name: testing
+name: CI - Build Verification
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  hello:
+  build-verification:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Say Hello
-        run: echo "testing branch pr"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # ---------------- BACKEND ----------------
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Backend syntax check
+        run: |
+          cd backend
+          node --check server.js
+
+      # ---------------- FRONTEND ----------------
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
