@@ -1,9 +1,6 @@
 name: CI - Build Verification
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -42,3 +39,76 @@ jobs:
         run: |
           cd frontend
           npm run build
+
+
+  verify-stack:
+    runs-on: ubuntu-latest
+    needs: build-verification
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: build images
+        run: |
+          docker build -t backend-image ./backend
+          docker build -t frontend-image ./frontend
+
+      - name: install trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.48.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.48.0_Linux-64bit.deb
+
+      - name: scan backend
+        run: trivy image backend-image
+
+      - name: scan frontend
+        run: trivy image frontend-image
+
+
+  run-tests:
+    runs-on: ubuntu-latest
+    needs: verify-stack
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: start stack
+        run: docker compose up -d
+
+      - name: wait backend
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q backend))
+
+            echo "backend: $status"
+
+            [ "$status" = "healthy" ] && break
+            sleep 2
+          done
+
+          if [ "$status" != "healthy" ]; then
+            docker compose logs backend
+            exit 1
+          fi
+
+      - name: wait frontend
+        run: |
+          for i in $(seq 1 30); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' $(docker compose ps -q frontend))
+
+            echo "frontend: $status"
+
+            [ "$status" = "healthy" ] && exit 0
+            sleep 2
+          done
+
+          docker compose logs frontend
+          exit 1
+
+      - name: cleanup
+        if: always()
+        run: docker compose down -v
