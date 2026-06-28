@@ -53,14 +53,14 @@ jobs:
 
       # -------- FIXED TRIVY (NO INSTALL BUGS) --------
       - name: scan backend image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: backend-image
           format: table
           exit-code: 1
 
       - name: scan frontend image
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: frontend-image
           format: table
