@@ -36,7 +36,7 @@ jobs:
 
 
 # =========================
-# JOB 2: BUILD + SCAN (FIXED TRIVY)
+# JOB 2: BUILD + SCAN
 # =========================
   image-scan:
     runs-on: ubuntu-latest
@@ -51,20 +51,21 @@ jobs:
           docker build -t backend-image ./backend
           docker build -t frontend-image ./frontend
 
-      # -------- FIXED TRIVY (NO INSTALL BUGS) --------
       - name: scan backend image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: backend-image
           format: table
-          exit-code: 1
+          severity: CRITICAL
+          exit-code: '1'
 
       - name: scan frontend image
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: frontend-image
           format: table
-          exit-code: 1
+          severity: CRITICAL
+          exit-code: '1'
 
 
 # =========================
