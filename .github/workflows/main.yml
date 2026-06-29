@@ -1,4 +1,4 @@
-name: CI - Build Verification
+name: testing 
 
 on:
   pull_request:
